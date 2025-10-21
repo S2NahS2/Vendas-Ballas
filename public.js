@@ -78,10 +78,34 @@ function calcular(){
     total += lineTotal;
     totalWeight += (p.weight || 0) * qty;
 
-    const pm = deepClone(p.materials || {});
-    if (tipo === 'entrega' && p.materials_rules?.omit_on_entrega){
-      p.materials_rules.omit_on_entrega.forEach(m => { delete pm[m]; });
-    }
+    // clona materiais
+const pm = deepClone(p.materials || {});
+
+// util: normaliza strings (remove acentos / case-insensitive)
+const norm = s => (s || '')
+  .toString()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .trim();
+
+function omitByList(targetObj, list) {
+  if (!list || !Array.isArray(list)) return;
+  const keys = Object.keys(targetObj);
+  const normKeys = keys.map(k => norm(k));
+  list.forEach(entry => {
+    const i = normKeys.indexOf(norm(entry));
+    if (i >= 0) delete targetObj[keys[i]];
+  });
+}
+
+// aplica regras de omissão
+if (tipo === 'entrega' && p.materials_rules?.omit_on_entrega) {
+  omitByList(pm, p.materials_rules.omit_on_entrega);
+}
+if (tipo === 'parceria_entrega' && p.materials_rules?.omit_on_parceria_entrega) {
+  omitByList(pm, p.materials_rules.omit_on_parceria_entrega);
+}
+
     Object.entries(pm).forEach(([m, baseQty]) => {
       mats[m] = (mats[m] || 0) + (baseQty * qty);
     });
