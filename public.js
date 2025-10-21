@@ -36,7 +36,6 @@ function renderCategorias(){
       if (precoParceria != null) pricesLine += ` • Parceria: <strong>${fmtMoney(precoParceria)}</strong>`;
       div.innerHTML = `
         <h4>${name}</h4>
-        <div class="small">${pricesLine} • Peso: <strong>${(p.weight ?? 0).toFixed(2)} kg</strong></div>
         <div class="field">
           <label>Quantidade</label>
           <input type="number" min="0" value="0" data-prod="${name}" class="qtd">
