@@ -121,8 +121,8 @@ if (tipo === 'parceria_entrega' && p.materials_rules?.omit_on_parceria_entrega) 
     <p><strong>${header}</strong></p>
     ${linesHtml}
     <p><strong>
-      Total ${fmtMoney(total)} | 
-      Valor sujo ${fmtMoney(sujo)} | 
+      Total <span class="text-total">${fmtMoney(total)}</span> |
+      Valor sujo <span class="text-sujo">${fmtMoney(sujo)}</span> |
       Peso ${totalWeight.toFixed(2)} kg
     </strong></p>
   `;
