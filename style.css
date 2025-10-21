@@ -149,8 +149,10 @@ ul { margin: 0; padding-left: 18px; }
 @media (min-width: 1000px) { .produtos { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 640px)  { .produtos { grid-template-columns: 1fr; } }
 
-:root{
-  --bad: #ff5c74;     /* vermelho suave */
+:root {
+  --good: #27e18a;   /* verde */
+  --bad:  #ff5c74;   /* vermelho */
 }
-.text-total { color: var(--good); }   /* já existe --good em verde */
-.text-sujo  { color: var(--bad); }
+
+.text-total { color: var(--good); }
+.text-sujo  { color: var(--bad);  }
