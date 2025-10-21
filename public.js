@@ -97,7 +97,11 @@ function calcular(){
   res.innerHTML = `
     <p><strong>${header}</strong></p>
     ${linesHtml}
-    <p><strong>Total ${fmtMoney(total)} | Valor sujo ${fmtMoney(sujo)} | Peso ${totalWeight.toFixed(2)} kg</strong></p>
+    <p><strong>
+      Total ${fmtMoney(total)} | 
+      Valor sujo ${fmtMoney(sujo)} | 
+      Peso ${totalWeight.toFixed(2)} kg
+    </strong></p>
   `;
 
   const ul = document.getElementById('materiais');
