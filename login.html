@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login • Ballas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1 class="logo">Ballas • Acesso</h1>
+    </header>
+
+    <section class="card">
+      <h2 class="card-title">Área protegida</h2>
+      <p class="card-sub">Digite a senha para entrar.</p>
+
+      <div class="controls" style="max-width:520px; margin:0 auto;">
+        <div class="field">
+          <label>Senha</label>
+          <input id="senha" type="password" placeholder="••••••••">
+        </div>
+        <button class="btn" id="entrar">Entrar</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const PUBLIC_HASH = "ab029a1c0392411ddd11a85d85c99dbe33bf7ba7fc8390c53c739f0c996fe8c7";
+    const ADMIN_HASH  = "392d7402e0e0b7dc45f0ed79e8fe669d4680d69c28b0897add331211bf1fb689";
+    async function sha256(text) {
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    document.getElementById('entrar').addEventListener('click', async () => {
+      const val = document.getElementById('senha').value || "";
+      const h = await sha256(val);
+      if (h === ADMIN_HASH) {
+        sessionStorage.setItem('ballas_access', 'admin');
+        window.location.href = 'admin.html';
+      } else if (h === PUBLIC_HASH) {
+        sessionStorage.setItem('ballas_access', 'user');
+        window.location.href = 'index.html';
+      } else {
+        alert('Senha incorreta.');
+      }
+    });
+  </script>
+</body>
+</html>

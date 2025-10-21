@@ -1,0 +1,45 @@
+{
+  "M1911": {
+    "category": "Pistola",
+    "prices": {
+      "normal": 67000,
+      "parceria": 60000
+    },
+    "weight": 2.25,
+    "materials": {
+      "Alumínio": 150,
+      "Cobre": 150,
+      "Vidro": 175,
+      "Corpo de pistola": 1,
+      "Plásticos": 175,
+      "Borrachas": 175,
+      "Peças de armas": 3
+    }
+  },
+  "Five Seven": {
+    "category": "Pistola",
+    "prices": {
+      "normal": 80000,
+      "entrega": 70000,
+      "parceria": 75000
+    },
+    "weight": 2.75,
+    "materials": {
+      "Alumínio": 180,
+      "Cobre": 180,
+      "Vidro": 215,
+      "Corpo de pistola": 1,
+      "Plásticos": 215,
+      "Borrachas": 215,
+      "Peças de armas": 3,
+      "Engrenagem": 1,
+      "Parafusos pequenos": 1,
+      "Upgrade pistola": 1
+    },
+    "materials_rules": {
+      "omit_on_entrega": [
+        "Upgrade pistola"
+      ]
+    }
+  }
+}

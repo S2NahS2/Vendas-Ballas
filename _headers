@@ -1,0 +1,10 @@
+/* 
+  Cache-Control: public, max-age=0, must-revalidate
+/products.json
+  Cache-Control: no-cache, no-store, must-revalidate
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/admin.html
+  Cache-Control: no-cache, no-store, must-revalidate
+/login.html
+  Cache-Control: no-cache, no-store, must-revalidate

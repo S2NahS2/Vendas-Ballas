@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orçamento • Ballas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1 class="logo">Ballas • Orçamento</h1>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2 class="card-title">Dados do comprador</h2>
+      <div class="controls">
+        <div class="field">
+          <label>Nome do comprador</label>
+          <input id="comprador" type="text" placeholder="Nome">
+        </div>
+        <div class="field">
+          <label>Nome da facção</label>
+          <input id="faccao" type="text" placeholder="Ex: Eastside Ballas">
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select id="tipo">
+            <option value="normal">Normal</option>
+            <option value="entrega">Entrega de upgrade</option>
+            <option value="parceria">Parceria</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Produtos</h2>
+      <div id="categorias" class="categorias"></div>
+      <div class="controls">
+        <button class="btn" id="calcular">Calcular</button>
+        <button class="btn outline" id="limpar">Limpar</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Resultado</h2>
+      <div id="resultado" class="resumo">
+        <p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>
+      </div>
+      <div class="materiais">
+        <h3>Materiais usados</h3>
+        <ul id="materiais"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const access = sessionStorage.getItem('ballas_access');
+    if (access !== 'user' && access !== 'admin') { window.location.href = 'login.html'; }
+  </script>
+  <script src="public.js"></script>
+</body>
+</html>

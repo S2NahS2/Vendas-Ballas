@@ -1,0 +1,150 @@
+/* =========================================================
+   Ballas Theme — style.css (categorias + cards nivelados)
+   ========================================================= */
+:root {
+  --ballas: #19002E;
+  --paper: #0d0a12;
+  --card: #141018;
+  --ink: #f2ecff;
+  --muted: #9d8bbd;
+  --accent: #7a3cff;
+  --good: #27e18a;
+  --border: rgba(255,255,255,.08);
+  --border-soft: rgba(255,255,255,.12);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Archivo', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, #2c1052 0%, transparent 60%),
+    radial-gradient(1000px 600px at 100% 0%, #1a0b33 0%, transparent 55%),
+    var(--paper);
+}
+.hero {
+  padding: 34px 16px 10px;
+  background: linear-gradient(180deg, rgba(25,0,46,.65) 0%, rgba(25,0,46,0) 100%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  text-align: center;
+}
+.logo {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 40px;
+  letter-spacing: 1px;
+  color: #b689ff;
+  text-shadow: 0 3px 0 rgba(0,0,0,.35), 0 0 24px rgba(182,137,255,.35);
+}
+.container { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.card-title { margin: 0 0 4px; font-size: 20px; }
+.card-sub { margin: 0 0 12px; color: var(--muted); }
+
+.field { display: grid; gap: 6px; }
+label { color: var(--muted); font-size: 13px; }
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: #110c18;
+  color: var(--ink);
+}
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+  align-items: end;
+}
+.btn {
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: linear-gradient(180deg, var(--accent), #5b2dd6);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(122,60,255,.28);
+}
+.btn:hover { filter: brightness(1.05); }
+.btn.outline { background: transparent; border: 1px solid rgba(255,255,255,.22); }
+
+/* ===== Categorias ===== */
+.categorias { display: grid; gap: 18px; }
+.categoria {
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255,255,255,.02);
+}
+.categoria-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  letter-spacing: .5px;
+  color: #b689ff;
+  text-shadow: 0 0 14px rgba(182,137,255,.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.categoria-title::before {
+  content: "";
+  width: 10px; height: 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ===== Grade de produtos ===== */
+.produtos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+
+/* ===== Card de produto (nivelado) ===== */
+.item {
+  background: var(--card);
+  border: 1px dashed var(--border-soft);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.item h4 { margin: 0 0 6px; font-size: 16px; }
+.item .small {
+  color: var(--muted);
+  line-height: 1.25;
+  min-height: 2.8em; /* reserva ~2 linhas p/ preços → alinha o input em todos os cards */
+}
+.item .field { margin-top: auto; } /* joga o input p/ base do card */
+.item input[type="number"] { width: 100%; }
+
+/* ===== Resumo / Materiais ===== */
+.resumo {
+  margin-top: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.materiais { margin-top: 12px; }
+ul { margin: 0; padding-left: 18px; }
+.success { color: var(--good); font-weight: 700; }
+
+/* Responsivo extra */
+@media (min-width: 1400px) { .produtos { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1000px) { .produtos { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .produtos { grid-template-columns: 1fr; } }
