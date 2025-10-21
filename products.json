@@ -19,9 +19,10 @@
   "Five Seven": {
     "category": "Pistola",
     "prices": {
-      "normal": 80000,
-      "entrega": 70000,
-      "parceria": 75000
+      "normal": 80000.0,
+      "entrega": 70000.0,
+      "parceria": 75000.0,
+      "parceria_entrega": 65000.0
     },
     "weight": 2.75,
     "materials": {
@@ -38,6 +39,9 @@
     },
     "materials_rules": {
       "omit_on_entrega": [
+        "Upgrade pistola"
+      ]
+      "omit_on_parceria_entrega": [
         "Upgrade pistola"
       ]
     }
