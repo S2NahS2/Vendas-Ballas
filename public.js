@@ -107,8 +107,8 @@ if (tipo === 'parceria_entrega' && p.materials_rules?.omit_on_parceria_entrega) 
 }
 
     Object.entries(pm).forEach(([m, baseQty]) => {
-      mats[m] = (mats[m] || 0) + (baseQty * qty);
-    });
+    mats[m] = (mats[m] || 0) + (Number(baseQty) || 0) * qty;
+});
 
     lines.push(`${qty} × ${name} = ${fmtMoney(lineTotal)}`);
   });
