@@ -3,7 +3,9 @@
     "category": "Pistola",
     "prices": {
       "normal": 67000.0,
-      "parceria": 60000.0
+      "parceria": 60000.0,
+      "entrega": 67000.0,
+      "parceria_entrega": 60000.0
     },
     "weight": 2.25,
     "materials": {
@@ -41,6 +43,53 @@
     "materials_rules": {
       "omit_on_entrega": ["Upgrade pistola"],
       "omit_on_parceria_entrega": ["Upgrade pistola"]
+    }
+  },
+
+  "Munição Pistola": {
+    "category": "Munições",
+    "prices": {
+      "normal": 15000.0,
+      "parceria": 14000.0,
+      "entrega": 15000.0,
+      "parceria_entrega": 14000.0
+    },
+    "weight": 0.75,
+    "materials": {
+      "Cobre": 15,
+      "Frascos de pólvora": 3
+    }
+  },
+
+  "Munição Sub": {
+    "category": "Munições",
+    "prices": {
+      "normal": 20000.0,
+      "parceria": 18000.0,
+      "entrega": 20000.0,
+      "parceria_entrega": 18000.0
+    },
+    "weight": 0.75,
+    "materials": {
+      "Alumínio": 15,
+      "Cobre": 15,
+      "Frascos de pólvora": 5
+    }
+  },
+
+  "Munição Rifle": {
+    "category": "Munições",
+    "prices": {
+      "normal": 25000.0,
+      "parceria": 23000.0,
+      "entrega": 25000.0,
+      "parceria_entrega": 23000.0
+    },
+    "weight": 0.75,
+    "materials": {
+      "Alumínio": 30,
+      "Cobre": 30,
+      "Frascos de pólvora": 8
     }
   }
 }
