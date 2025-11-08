@@ -1,192 +1,150 @@
-// =================== CONFIGURAÇÃO DE PRODUTOS ===================
-const PRODUCTS = {
-  "M1911": {
-    category: "Pistola",
-    prices: {
-      normal: 67000.0,
-      parceria: 60000.0,
-      entrega: 67000.0,
-      parceria_entrega: 60000.0
-    },
-    weight: 2.25,
-    materials: {
-      "Alumínio": 150,
-      "Cobre": 150,
-      "Vidro": 175,
-      "Corpo de pistola": 1,
-      "Plástico": 175,
-      "Borracha": 175,
-      "Peças de armas": 3
-    }
-  },
+const fmtMoney = (n) => n.toLocaleString('en-US', {style:'currency', currency:'USD'});
+const fmtKg = (n) => `${n.toFixed(2)} kg`;
+const SUJO_FACTOR = 1.3;
+let catalog = {};
 
-  "Five Seven": {
-    category: "Pistola",
-    prices: {
-      normal: 80000.0,
-      entrega: 70000.0,
-      parceria: 75000.0,
-      parceria_entrega: 65000.0
-    },
-    weight: 2.75,
-    materials: {
-      "Alumínio": 180,
-      "Cobre": 180,
-      "Vidro": 215,
-      "Plástico": 215,
-      "Borracha": 215,
-      "Corpo de pistola": 1,
-      "Peças de armas": 3,
-      "Engrenagem": 1,
-      "Parafusos pequenos": 1,
-      "Upgrade pistola": 1
-    },
-    materials_rules: {
-      omit_on_entrega: ["Upgrade pistola"],
-      omit_on_parceria_entrega: ["Upgrade pistola"]
-    }
-  },
-
-  "Munição Pistola (x30)": {
-    category: "Munições",
-    prices: {
-      normal: 15000.0,
-      parceria: 14000.0,
-      entrega: 15000.0,
-      parceria_entrega: 14000.0
-    },
-    weight: 0.75,
-    materials: {
-      "Cobre": 15,
-      "Frascos de pólvora": 3
-    }
-  },
-
-  "Munição Sub (x30)": {
-    category: "Munições",
-    prices: {
-      normal: 20000.0,
-      parceria: 18000.0,
-      entrega: 20000.0,
-      parceria_entrega: 18000.0
-    },
-    weight: 0.75,
-    materials: {
-      "Alumínio": 15,
-      "Cobre": 15,
-      "Frascos de pólvora": 5
-    }
-  },
-
-  "Munição Rifle (x30)": {
-    category: "Munições",
-    prices: {
-      normal: 25000.0,
-      parceria: 23000.0,
-      entrega: 25000.0,
-      parceria_entrega: 23000.0
-    },
-    weight: 0.75,
-    materials: {
-      "Alumínio": 30,
-      "Cobre": 30,
-      "Frascos de pólvora": 8
-    }
-  }
-};
-
-// =================== FUNÇÕES GERAIS ===================
-const $ = s => document.querySelector(s);
-const fmt = v => "R$ " + Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
-const clone = o => JSON.parse(JSON.stringify(o));
-
-// =================== RENDERIZAÇÃO DINÂMICA ===================
-function renderCategorias() {
-  const container = $("#categorias");
-  const porCategoria = {};
-
-  // agrupar por categoria
-  for (const [nome, dados] of Object.entries(PRODUCTS)) {
-    if (!porCategoria[dados.category]) porCategoria[dados.category] = [];
-    porCategoria[dados.category].push({ nome, dados });
-  }
-
-  // construir HTML
-  container.innerHTML = Object.entries(porCategoria)
-    .map(([cat, itens]) => `
-      <div class="categoria">
-        <h3 class="categoria-title">• ${cat}</h3>
-        <div class="produtos">
-          ${itens.map(({ nome }) => `
-            <div class="item">
-              <h4>${nome}</h4>
-              <label class="small">Quantidade</label>
-              <input type="number" id="q_${nome.replace(/\\W+/g, '_')}" min="0" value="0">
-            </div>
-          `).join("")}
+async function loadCatalog(){
+  const res = await fetch('products.json?v=' + Date.now(), {cache:'no-store'});
+  catalog = await res.json();
+  renderCategorias();
+}
+function renderCategorias(){
+  const catWrap = document.getElementById('categorias');
+  catWrap.innerHTML = '';
+  // Agrupar por categoria
+  const groups = {};
+  Object.entries(catalog).forEach(([name, p]) => {
+    const cat = p.category || 'Outros';
+    (groups[cat] = groups[cat] || []).push([name, p]);
+  });
+  // Ordenar por nome da categoria
+  Object.keys(groups).sort().forEach(catName => {
+    // Sort products by name
+    groups[catName].sort((a, b) => a[0].localeCompare(b[0]));
+    const section = document.createElement('section');
+    section.className = 'categoria';
+    section.innerHTML = `<h3 class="categoria-title">${catName}</h3><div class="produtos"></div>`;
+    const grid = section.querySelector('.produtos');
+    groups[catName].forEach(([name, p]) => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      const precoNormal = p.prices?.normal ?? 0;
+      const precoEntrega = p.prices?.entrega ?? null;
+      const precoParceria = p.prices?.parceria ?? null;
+      let pricesLine = `Normal: <strong>${fmtMoney(precoNormal)}</strong>`;
+      if (precoEntrega != null) pricesLine += ` • Entrega: <strong>${fmtMoney(precoEntrega)}</strong>`;
+      if (precoParceria != null) pricesLine += ` • Parceria: <strong>${fmtMoney(precoParceria)}</strong>`;
+      div.innerHTML = `
+        <h4>${name}</h4>
+        <div class="field">
+          <label>Quantidade</label>
+          <input type="number" min="0" value="0" data-prod="${name}" class="qtd">
         </div>
-      </div>
-    `).join("");
+      `;
+      grid.appendChild(div);
+    });
+    catWrap.appendChild(section);
+  });
 }
 
-// =================== CÁLCULO DO ORÇAMENTO ===================
-function calcular() {
-  const descontoTipo = ($("#tipo").value || "normal").toLowerCase();
-  const upgradeEntregue = $("#upgrade").checked;
+function collectQuantities(){
+  const inputs = document.querySelectorAll('.qtd');
+  const q = {};
+  inputs.forEach(inp => {
+    const name = inp.dataset.prod;
+    const val = parseInt(inp.value || '0', 10);
+    if (val > 0) q[name] = val;
+  });
+  return q;
+}
+function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
-  let subtotal = 0, pesoTotal = 0;
-  const materiais = {};
-  const linhas = [];
+function calcular(){
+  const buyer = (document.getElementById('comprador').value || '').trim();
+  const faction = (document.getElementById('faccao').value || '').trim();
+  const tipo = document.getElementById('tipo').value; // normal | entrega | parceria
+  const q = collectQuantities();
 
-  for (const [nome, dados] of Object.entries(PRODUCTS)) {
-    const q = parseInt($(`#q_${nome.replace(/\\W+/g, '_')}`)?.value || "0", 10);
-    if (q <= 0) continue;
+  const lines = [];
+  let total = 0;
+  let totalWeight = 0;
+  const mats = {};
 
-    // selecionar preço com base no desconto
-    let preco = dados.prices[descontoTipo] ?? dados.prices.normal;
+  Object.entries(q).forEach(([name, qty]) => {
+    const p = catalog[name];
+    let unit = p.prices?.[tipo];
+    if (unit == null) unit = p.prices?.normal || 0;
+    const lineTotal = unit * qty;
+    total += lineTotal;
+    totalWeight += (p.weight || 0) * qty;
 
-    // aplicar regra de upgrade
-    const materiaisUsados = clone(dados.materials);
-    if (upgradeEntregue && dados.materials_rules?.omit_on_entrega?.length) {
-      dados.materials_rules.omit_on_entrega.forEach(m => delete materiaisUsados[m]);
-      preco -= 10000;
-    }
+    // clona materiais
+const pm = deepClone(p.materials || {});
 
-    const totalItem = preco * q;
-    subtotal += totalItem;
-    pesoTotal += dados.weight * q;
+// util: normaliza strings (remove acentos / case-insensitive)
+const norm = s => (s || '')
+  .toString()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .trim();
 
-    linhas.push(`• ${q} × ${nome} = ${fmt(preco)} (${fmt(totalItem)})`);
+function omitByList(targetObj, list) {
+  if (!list || !Array.isArray(list)) return;
+  const keys = Object.keys(targetObj);
+  const normKeys = keys.map(k => norm(k));
+  list.forEach(entry => {
+    const i = normKeys.indexOf(norm(entry));
+    if (i >= 0) delete targetObj[keys[i]];
+  });
+}
 
-    // somar materiais
-    for (const [mat, val] of Object.entries(materiaisUsados)) {
-      materiais[mat] = (materiais[mat] || 0) + val * q;
-    }
-  }
+// aplica regras de omissão
+if (tipo === 'entrega' && p.materials_rules?.omit_on_entrega) {
+  omitByList(pm, p.materials_rules.omit_on_entrega);
+}
+if (tipo === 'parceria_entrega' && p.materials_rules?.omit_on_parceria_entrega) {
+  omitByList(pm, p.materials_rules.omit_on_parceria_entrega);
+}
 
-  const total = subtotal;
-  const sujo = total * 1.3;
+    Object.entries(pm).forEach(([m, baseQty]) => {
+    mats[m] = (mats[m] || 0) + (Number(baseQty) || 0) * qty;
+});
 
-  $("#resultado").innerHTML = `
-    ${linhas.join("<br>")}
-    <br><strong>Total <span class="text-total">${fmt(total)}</span> | Valor sujo <span class="text-sujo">${fmt(sujo)}</span> | Peso ${pesoTotal.toFixed(2)} kg</strong>
+    lines.push(`${qty} × ${name} = ${fmtMoney(lineTotal)}`);
+  });
+
+  const sujo = total * SUJO_FACTOR;
+  const res = document.getElementById('resultado');
+  const header = `${buyer || '—'} (${faction || '—'})`;
+  const linesHtml = lines.length ? lines.map(l => `<div>• ${l}</div>`).join('') : '<div class="small">Nenhum item selecionado.</div>';
+  res.innerHTML = `
+    <p><strong>${header}</strong></p>
+    ${linesHtml}
+    <p><strong>
+      Total <span class="text-total">${fmtMoney(total)}</span> |
+      Valor sujo <span class="text-sujo">${fmtMoney(sujo)}</span> |
+      Peso ${totalWeight.toFixed(2)} kg
+    </strong></p>
   `;
 
-  $("#materiais").innerHTML = Object.entries(materiais)
-    .map(([k, v]) => `${k}: ${v}`)
-    .join("<br>");
+  const ul = document.getElementById('materiais');
+  ul.innerHTML = '';
+  Object.keys(mats).sort().forEach(m => {
+    const li = document.createElement('li');
+    li.textContent = `${m}: ${mats[m]}`;
+    ul.appendChild(li);
+  });
 }
 
-// =================== RESET ===================
-function limpar() {
-  document.querySelectorAll("input[type='number']").forEach(i => i.value = 0);
-  $("#resultado").innerHTML = "<p class='small'>Preencha as quantidades e clique em <strong>Calcular</strong>.</p>";
-  $("#materiais").innerHTML = "";
+function limpar(){
+  document.querySelectorAll('.qtd').forEach(inp => inp.value = 0);
+  document.getElementById('comprador').value = '';
+  document.getElementById('faccao').value = '';
+  document.getElementById('tipo').value = 'normal';
+  document.getElementById('resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
+  document.getElementById('materiais').innerHTML = '';
 }
 
-// =================== EVENTOS ===================
-document.addEventListener("DOMContentLoaded", () => {
-  renderCategorias();
-  $("#calcular").addEventListener("click", calcular);
-  $("#limpar").addEventListener("click", limpar);
-});
+document.getElementById('calcular').addEventListener('click', calcular);
+document.getElementById('limpar').addEventListener('click', limpar);
+loadCatalog();
