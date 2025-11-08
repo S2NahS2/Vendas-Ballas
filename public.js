@@ -126,7 +126,7 @@ function calc() {
   for (const { p, qty } of items) {
     const unitPrice = p.price * (1 - descontoPct / 100);
     let produced = qty;
-    let producedBatches = 1;
+    let producedBatches = 1;   // <— declara só aqui (uma vez)
     let leftover = 0;
 
     // controle de produção para munições (batch)
@@ -141,10 +141,8 @@ function calc() {
     subtotal += lineTotal;
     pesoTotal += (p.weight || 0) * qty;
 
-    // 👇 Aqui adiciona o número de batches no texto (ex: 45 (2) × Munição Pistola)
-    const producedBatches = (p.category === 'Munições') ? Math.ceil(qty / p.batch) : 1;
+    // 👇 usa a mesma producedBatches calculada acima
     const batchText = (p.category === 'Munições') ? ` (${producedBatches})` : '';
-
     lines.push(`• ${qty}${batchText} × ${p.name} = ${fmt(lineTotal)}`);
 
     // Materiais
