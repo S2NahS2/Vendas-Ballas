@@ -82,7 +82,12 @@ const PRODUCTS = [
 ];
 
 const $ = (s) => document.querySelector(s);
-const fmt = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = (v) =>
+  '$' +
+  Number(v).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
 function calc() {
@@ -99,20 +104,21 @@ function calc() {
   const qMuniRifle = parseInt($('#qty_muni_rifle')?.value || '0', 10) || 0;
 
   const items = [];
-  if (qFS > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'), qty: qFS });
-  if (qM > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'), qty: qM });
-  if (qMuniPT > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'), qty: qMuniPT });
-  if (qMuniSub > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'), qty: qMuniSub });
-  if (qMuniRifle > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_rifle'), qty: qMuniRifle });
+  if (qFS > 0) items.push({ p: PRODUCTS.find((x) => x.id === 'fiveseven'), qty: qFS });
+  if (qM > 0) items.push({ p: PRODUCTS.find((x) => x.id === 'm1911'), qty: qM });
+  if (qMuniPT > 0) items.push({ p: PRODUCTS.find((x) => x.id === 'muni_pt'), qty: qMuniPT });
+  if (qMuniSub > 0) items.push({ p: PRODUCTS.find((x) => x.id === 'muni_sub'), qty: qMuniSub });
+  if (qMuniRifle > 0) items.push({ p: PRODUCTS.find((x) => x.id === 'muni_rifle'), qty: qMuniRifle });
 
   const excWrap = document.getElementById('excedentes-wrap');
   const matsBox = document.getElementById('materiais');
-  const excBox  = document.getElementById('excedentes');
+  const excBox = document.getElementById('excedentes');
 
   if (!items.length) {
-    $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
+    $('#resultado').innerHTML =
+      '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
     matsBox.textContent = '';
-    excBox.textContent  = '';
+    excBox.textContent = '';
     excWrap.style.display = 'none';
     return;
   }
@@ -123,43 +129,52 @@ function calc() {
   const mats = {};
   const excedentes = [];
 
+  // Cálculo principal
   for (const { p, qty } of items) {
     const unitPrice = p.price * (1 - descontoPct / 100);
+    const hasBatch = Number(p.batch) > 1;
+
+    let producedBatches = 1;
     let produced = qty;
-    let producedBatches = 1;   // <— declara só aqui (uma vez)
     let leftover = 0;
 
-    // controle de produção para munições (batch)
-    if (p.category === 'Munições') {
+    if (hasBatch) {
       producedBatches = Math.ceil(qty / p.batch);
       produced = producedBatches * p.batch;
       leftover = produced - qty;
-      excedentes.push({ nome: p.name, produzido: produced, vendido: qty, sobra: leftover });
+      excedentes.push({
+        nome: p.name,
+        produzido: produced,
+        vendido: qty,
+        sobra: leftover
+      });
     }
 
     const lineTotal = unitPrice * qty;
     subtotal += lineTotal;
     pesoTotal += (p.weight || 0) * qty;
 
-    // 👇 usa a mesma producedBatches calculada acima
-    const batchText = (p.category === 'Munições') ? ` (${producedBatches})` : '';
+    // Mostra número de batches no texto (ex: 45 (2) × Munição Pistola)
+    const batchText = hasBatch && producedBatches > 1 ? ` (${producedBatches})` : '';
     lines.push(`• ${qty}${batchText} × ${p.name} = ${fmt(lineTotal)}`);
 
     // Materiais
     const mm = clone(p.materials);
     if (upgradeEntregue && mm['Upgrade pistola'] != null) delete mm['Upgrade pistola'];
 
-    const multiplier = (p.category === 'Munições') ? producedBatches : qty;
+    const multiplier = hasBatch ? producedBatches : qty;
     for (const [nome, base] of Object.entries(mm)) {
       mats[nome] = (mats[nome] || 0) + base * multiplier;
     }
   }
 
+  // Totais
   let total = subtotal;
   if (upgradeEntregue) total -= 10000;
   if (total < 0) total = 0;
-  const valorSujo = total * 1.30;
+  const valorSujo = total * 1.3;
 
+  // Resumo principal
   const resumoHtml =
     lines.join('\n') +
     '\n\n' +
@@ -169,15 +184,20 @@ function calc() {
 
   $('#resultado').innerHTML = resumoHtml;
 
+  // Materiais
   const matsText = Object.entries(mats)
-    .sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'))
+    .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
     .map(([nome, qtd]) => `• ${nome}: ${qtd}`)
     .join('\n');
   matsBox.textContent = matsText || '—';
 
+  // Excedentes
   if (excedentes.length > 0) {
     const excText = excedentes
-      .map(e => `• ${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`)
+      .map(
+        (e) =>
+          `• ${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`
+      )
       .join('\n');
     excBox.textContent = excText;
     excWrap.style.display = '';
@@ -193,15 +213,16 @@ function clearAll() {
   $('#tipo').value = '0';
   $('#upgrade').checked = false;
 
-  ['qty_fiveseven','qty_m1911','qty_muni_pt','qty_muni_sub','qty_muni_rifle'].forEach(id => {
+  ['qty_fiveseven', 'qty_m1911', 'qty_muni_pt', 'qty_muni_sub', 'qty_muni_rifle'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = '0';
   });
 
-  $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
+  $('#resultado').innerHTML =
+    '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
   document.getElementById('materiais').textContent = '';
   const excWrap = document.getElementById('excedentes-wrap');
-  const excBox  = document.getElementById('excedentes');
+  const excBox = document.getElementById('excedentes');
   excBox.textContent = '';
   excWrap.style.display = 'none';
 }
