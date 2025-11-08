@@ -147,6 +147,7 @@ function calc() {
 
     lines.push(`• ${qty}${batchText} × ${p.name} = ${fmt(lineTotal)}`);
 
+    // Materiais
     const mm = clone(p.materials);
     if (upgradeEntregue && mm['Upgrade pistola'] != null) delete mm['Upgrade pistola'];
 
