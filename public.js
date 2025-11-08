@@ -1,150 +1,209 @@
-const fmtMoney = (n) => n.toLocaleString('en-US', {style:'currency', currency:'USD'});
-const fmtKg = (n) => `${n.toFixed(2)} kg`;
-const SUJO_FACTOR = 1.3;
-let catalog = {};
+// =================== CATÁLOGO ===================
+const PRODUCTS = [
+  {
+    id: 'fiveseven',
+    name: 'Five Seven',
+    category: 'Pistola',
+    price: 80000,
+    weight: 2.75,
+    batch: 1,
+    materials: {
+      'Alumínio': 180,
+      'Cobre': 180,
+      'Vidro': 215,
+      'Plástico': 215,
+      'Borracha': 215,
+      'Corpo de pistola': 1,
+      'Peças de armas': 3,
+      'Engrenagem': 1,
+      'Parafusos pequenos': 1,
+      'Upgrade pistola': 1
+    },
+    materials_rules: {
+      omit_on_entrega: ['Upgrade pistola'],
+      omit_on_parceria_entrega: ['Upgrade pistola']
+    }
+  },
+  {
+    id: 'm1911',
+    name: 'M1911',
+    category: 'Pistola',
+    price: 67000,
+    weight: 2.25,
+    batch: 1,
+    materials: {
+      'Alumínio': 150,
+      'Cobre': 150,
+      'Vidro': 175,
+      'Corpo de pistola': 1,
+      'Plástico': 175,
+      'Borracha': 175,
+      'Peças de armas': 3
+    }
+  },
+  {
+    id: 'muni_pt',
+    name: 'Munição Pistola',
+    category: 'Munições',
+    price: 150,
+    weight: 0.025,
+    batch: 30,
+    materials: {
+      'Cobre': 15,
+      'Frascos de pólvora': 3
+    }
+  },
+  {
+    id: 'muni_sub',
+    name: 'Munição Sub',
+    category: 'Munições',
+    price: 225,
+    weight: 0.025,
+    batch: 30,
+    materials: {
+      'Alumínio': 15,
+      'Cobre': 15,
+      'Frascos de pólvora': 5
+    }
+  },
+  {
+    id: 'muni_rifle',
+    name: 'Munição Rifle',
+    category: 'Munições',
+    price: 290,
+    weight: 0.025,
+    batch: 30,
+    materials: {
+      'Alumínio': 30,
+      'Cobre': 30,
+      'Frascos de pólvora': 8
+    }
+  }
+];
 
-async function loadCatalog(){
-  const res = await fetch('products.json?v=' + Date.now(), {cache:'no-store'});
-  catalog = await res.json();
-  renderCategorias();
-}
-function renderCategorias(){
-  const catWrap = document.getElementById('categorias');
-  catWrap.innerHTML = '';
-  // Agrupar por categoria
-  const groups = {};
-  Object.entries(catalog).forEach(([name, p]) => {
-    const cat = p.category || 'Outros';
-    (groups[cat] = groups[cat] || []).push([name, p]);
-  });
-  // Ordenar por nome da categoria
-  Object.keys(groups).sort().forEach(catName => {
-    // Sort products by name
-    groups[catName].sort((a, b) => a[0].localeCompare(b[0]));
-    const section = document.createElement('section');
-    section.className = 'categoria';
-    section.innerHTML = `<h3 class="categoria-title">${catName}</h3><div class="produtos"></div>`;
-    const grid = section.querySelector('.produtos');
-    groups[catName].forEach(([name, p]) => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      const precoNormal = p.prices?.normal ?? 0;
-      const precoEntrega = p.prices?.entrega ?? null;
-      const precoParceria = p.prices?.parceria ?? null;
-      let pricesLine = `Normal: <strong>${fmtMoney(precoNormal)}</strong>`;
-      if (precoEntrega != null) pricesLine += ` • Entrega: <strong>${fmtMoney(precoEntrega)}</strong>`;
-      if (precoParceria != null) pricesLine += ` • Parceria: <strong>${fmtMoney(precoParceria)}</strong>`;
-      div.innerHTML = `
-        <h4>${name}</h4>
-        <div class="field">
-          <label>Quantidade</label>
-          <input type="number" min="0" value="0" data-prod="${name}" class="qtd">
-        </div>
-      `;
-      grid.appendChild(div);
-    });
-    catWrap.appendChild(section);
-  });
-}
+const $ = (s) => document.querySelector(s);
+const fmt = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const clone = (o) => JSON.parse(JSON.stringify(o));
 
-function collectQuantities(){
-  const inputs = document.querySelectorAll('.qtd');
-  const q = {};
-  inputs.forEach(inp => {
-    const name = inp.dataset.prod;
-    const val = parseInt(inp.value || '0', 10);
-    if (val > 0) q[name] = val;
-  });
-  return q;
-}
-function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+function calc() {
+  const comprador = $('#comprador').value.trim() || '—';
+  const faccao = $('#faccao').value.trim() || '—';
+  const descontoPct = parseFloat($('#tipo').value || '0') || 0;
+  const upgradeEntregue = $('#upgrade').checked;
 
-function calcular(){
-  const buyer = (document.getElementById('comprador').value || '').trim();
-  const faction = (document.getElementById('faccao').value || '').trim();
-  const tipo = document.getElementById('tipo').value; // normal | entrega | parceria
-  const q = collectQuantities();
+  // Quantidades
+  const qFS = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
+  const qM = parseInt($('#qty_m1911').value || '0', 10) || 0;
+  const qMuniPT = parseInt($('#qty_muni_pt')?.value || '0', 10) || 0;
+  const qMuniSub = parseInt($('#qty_muni_sub')?.value || '0', 10) || 0;
+  const qMuniRifle = parseInt($('#qty_muni_rifle')?.value || '0', 10) || 0;
 
-  const lines = [];
-  let total = 0;
-  let totalWeight = 0;
+  const items = [];
+  if (qFS > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'), qty: qFS });
+  if (qM > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'), qty: qM });
+  if (qMuniPT > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'), qty: qMuniPT });
+  if (qMuniSub > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'), qty: qMuniSub });
+  if (qMuniRifle > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_rifle'), qty: qMuniRifle });
+
+  const excWrap = document.getElementById('excedentes-wrap');
+  const matsBox = document.getElementById('materiais');
+  const excBox  = document.getElementById('excedentes');
+
+  if (!items.length) {
+    $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
+    matsBox.textContent = '';
+    excBox.textContent  = '';
+    excWrap.style.display = 'none';
+    return;
+  }
+
+  const lines = [`${comprador} (${faccao})`];
+  let subtotal = 0;
+  let pesoTotal = 0;
   const mats = {};
+  const excedentes = [];
 
-  Object.entries(q).forEach(([name, qty]) => {
-    const p = catalog[name];
-    let unit = p.prices?.[tipo];
-    if (unit == null) unit = p.prices?.normal || 0;
-    const lineTotal = unit * qty;
-    total += lineTotal;
-    totalWeight += (p.weight || 0) * qty;
+  for (const { p, qty } of items) {
+    const unitPrice = p.price * (1 - descontoPct / 100);
+    let produced = qty;
+    let producedBatches = 1;
+    let leftover = 0;
 
-    // clona materiais
-const pm = deepClone(p.materials || {});
+    // controle de produção para munições (batch)
+    if (p.category === 'Munições') {
+      producedBatches = Math.ceil(qty / p.batch);
+      produced = producedBatches * p.batch;
+      leftover = produced - qty;
+      excedentes.push({ nome: p.name, produzido: produced, vendido: qty, sobra: leftover });
+    }
 
-// util: normaliza strings (remove acentos / case-insensitive)
-const norm = s => (s || '')
-  .toString()
-  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  .toLowerCase()
-  .trim();
+    const lineTotal = unitPrice * qty;
+    subtotal += lineTotal;
+    pesoTotal += (p.weight || 0) * qty;
 
-function omitByList(targetObj, list) {
-  if (!list || !Array.isArray(list)) return;
-  const keys = Object.keys(targetObj);
-  const normKeys = keys.map(k => norm(k));
-  list.forEach(entry => {
-    const i = normKeys.indexOf(norm(entry));
-    if (i >= 0) delete targetObj[keys[i]];
+    // 👇 Aqui adiciona o número de batches no texto (ex: 45 (2) × Munição Pistola)
+    const batchText = (p.category === 'Munições' && producedBatches > 1) ? ` (${producedBatches})` : '';
+    lines.push(`• ${qty}${batchText} × ${p.name} = ${fmt(lineTotal)}`);
+
+    const mm = clone(p.materials);
+    if (upgradeEntregue && mm['Upgrade pistola'] != null) delete mm['Upgrade pistola'];
+
+    const multiplier = (p.category === 'Munições') ? producedBatches : qty;
+    for (const [nome, base] of Object.entries(mm)) {
+      mats[nome] = (mats[nome] || 0) + base * multiplier;
+    }
+  }
+
+  let total = subtotal;
+  if (upgradeEntregue) total -= 10000;
+  if (total < 0) total = 0;
+  const valorSujo = total * 1.30;
+
+  const resumoHtml =
+    lines.join('\n') +
+    '\n\n' +
+    `Total <span class="text-total">${fmt(total)}</span> | ` +
+    `Valor sujo <span class="text-sujo">${fmt(valorSujo)}</span> | ` +
+    `Peso ${pesoTotal.toFixed(2)} kg`;
+
+  $('#resultado').innerHTML = resumoHtml;
+
+  const matsText = Object.entries(mats)
+    .sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'))
+    .map(([nome, qtd]) => `• ${nome}: ${qtd}`)
+    .join('\n');
+  matsBox.textContent = matsText || '—';
+
+  if (excedentes.length > 0) {
+    const excText = excedentes
+      .map(e => `• ${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`)
+      .join('\n');
+    excBox.textContent = excText;
+    excWrap.style.display = '';
+  } else {
+    excBox.textContent = '';
+    excWrap.style.display = 'none';
+  }
+}
+
+function clearAll() {
+  $('#comprador').value = '';
+  $('#faccao').value = '';
+  $('#tipo').value = '0';
+  $('#upgrade').checked = false;
+
+  ['qty_fiveseven','qty_m1911','qty_muni_pt','qty_muni_sub','qty_muni_rifle'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '0';
   });
+
+  $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
+  document.getElementById('materiais').textContent = '';
+  const excWrap = document.getElementById('excedentes-wrap');
+  const excBox  = document.getElementById('excedentes');
+  excBox.textContent = '';
+  excWrap.style.display = 'none';
 }
 
-// aplica regras de omissão
-if (tipo === 'entrega' && p.materials_rules?.omit_on_entrega) {
-  omitByList(pm, p.materials_rules.omit_on_entrega);
-}
-if (tipo === 'parceria_entrega' && p.materials_rules?.omit_on_parceria_entrega) {
-  omitByList(pm, p.materials_rules.omit_on_parceria_entrega);
-}
-
-    Object.entries(pm).forEach(([m, baseQty]) => {
-    mats[m] = (mats[m] || 0) + (Number(baseQty) || 0) * qty;
-});
-
-    lines.push(`${qty} × ${name} = ${fmtMoney(lineTotal)}`);
-  });
-
-  const sujo = total * SUJO_FACTOR;
-  const res = document.getElementById('resultado');
-  const header = `${buyer || '—'} (${faction || '—'})`;
-  const linesHtml = lines.length ? lines.map(l => `<div>• ${l}</div>`).join('') : '<div class="small">Nenhum item selecionado.</div>';
-  res.innerHTML = `
-    <p><strong>${header}</strong></p>
-    ${linesHtml}
-    <p><strong>
-      Total <span class="text-total">${fmtMoney(total)}</span> |
-      Valor sujo <span class="text-sujo">${fmtMoney(sujo)}</span> |
-      Peso ${totalWeight.toFixed(2)} kg
-    </strong></p>
-  `;
-
-  const ul = document.getElementById('materiais');
-  ul.innerHTML = '';
-  Object.keys(mats).sort().forEach(m => {
-    const li = document.createElement('li');
-    li.textContent = `${m}: ${mats[m]}`;
-    ul.appendChild(li);
-  });
-}
-
-function limpar(){
-  document.querySelectorAll('.qtd').forEach(inp => inp.value = 0);
-  document.getElementById('comprador').value = '';
-  document.getElementById('faccao').value = '';
-  document.getElementById('tipo').value = 'normal';
-  document.getElementById('resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
-  document.getElementById('materiais').innerHTML = '';
-}
-
-document.getElementById('calcular').addEventListener('click', calcular);
-document.getElementById('limpar').addEventListener('click', limpar);
-loadCatalog();
+document.getElementById('calcular').addEventListener('click', calc);
+document.getElementById('limpar').addEventListener('click', clearAll);
