@@ -12,16 +12,20 @@
   --border: rgba(255,255,255,.08);
   --border-soft: rgba(255,255,255,.12);
 }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+
 body {
   margin: 0;
   font-family: 'Archivo', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   color: var(--ink);
   background:
     radial-gradient(1200px 600px at 20% -10%, #2c1052 0%, transparent 60%),
-    var(--paper);
+    var(--paper); /* removido o segundo gradiente para tirar a faixa roxa do rodapé */
 }
+
+/* ======= HEADER ======= */
 .hero {
   padding: 34px 16px 10px;
   background: linear-gradient(180deg, rgba(25,0,46,.65) 0%, rgba(25,0,46,0) 100%);
@@ -35,7 +39,10 @@ body {
   color: #b689ff;
   text-shadow: 0 3px 0 rgba(0,0,0,.35), 0 0 24px rgba(182,137,255,.35);
 }
+
+/* ======= CONTAINER E CARDS ======= */
 .container { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+
 .card {
   background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
   border: 1px solid var(--border);
@@ -44,11 +51,14 @@ body {
   margin: 16px 0;
   box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
+
 .card-title { margin: 0 0 4px; font-size: 20px; }
 .card-sub { margin: 0 0 12px; color: var(--muted); }
 
+/* ======= CAMPOS ======= */
 .field { display: grid; gap: 6px; }
 label { color: var(--muted); font-size: 13px; }
+
 input[type="text"], input[type="number"], select {
   width: 100%;
   padding: 10px 12px;
@@ -57,6 +67,8 @@ input[type="text"], input[type="number"], select {
   background: #110c18;
   color: var(--ink);
 }
+
+/* ======= BOTÕES ======= */
 .controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -77,14 +89,25 @@ input[type="text"], input[type="number"], select {
 .btn:hover { filter: brightness(1.05); }
 .btn.outline { background: transparent; border: 1px solid rgba(255,255,255,.22); }
 
-/* ===== Categorias ===== */
+/* ======= CHECKBOX LINE ======= */
+.checkline {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color: var(--muted);
+  font-size:13px;
+}
+
+/* ======= CATEGORIAS ======= */
 .categorias { display: grid; gap: 18px; }
+
 .categoria {
   border: 1px dashed var(--border);
   border-radius: 16px;
   padding: 14px;
   background: rgba(255,255,255,.02);
 }
+
 .categoria-title {
   margin: 0 0 12px;
   font-size: 18px;
@@ -95,6 +118,7 @@ input[type="text"], input[type="number"], select {
   align-items: center;
   gap: 8px;
 }
+
 .categoria-title::before {
   content: "";
   width: 10px; height: 10px;
@@ -103,7 +127,7 @@ input[type="text"], input[type="number"], select {
   box-shadow: 0 0 10px var(--accent);
 }
 
-/* ===== Grade de produtos ===== */
+/* ======= PRODUTOS ======= */
 .produtos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -112,7 +136,6 @@ input[type="text"], input[type="number"], select {
   grid-auto-rows: 1fr;
 }
 
-/* ===== Card de produto (nivelado) ===== */
 .item {
   background: var(--card);
   border: 1px dashed var(--border-soft);
@@ -126,25 +149,14 @@ input[type="text"], input[type="number"], select {
 .item .small {
   color: var(--muted);
   line-height: 1.25;
-  min-height: 2.8em; /* reserva ~2 linhas p/ preços → alinha o input em todos os cards */
+  min-height: 2.8em;
 }
-.item .field { margin-top: auto; } /* joga o input p/ base do card */
+.item .field { margin-top: auto; }
 .item input[type="number"] { width: 100%; }
 
-/* ===== Resumo / Materiais ===== */
+/* ======= RESUMOS ======= */
 .resumo {
   margin-top: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-.materiais {
-  margin-top: 12px;
-}
-
-#materiais.resumo,
-#excedentes.resumo {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -152,44 +164,43 @@ input[type="text"], input[type="number"], select {
   white-space: pre-line;
 }
 
-/* Responsivo extra */
-@media (min-width: 1400px) { .produtos { grid-template-columns: repeat(4, 1fr); } }
-@media (min-width: 1000px) { .produtos { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px)  { .produtos { grid-template-columns: 1fr; } }
-
-.text-total {
-  color: #27e18a; /* verde */
-  font-weight: 700;
+/* ——— Materiais usados e Munições excedentes ——— */
+.materiais {
+  margin-top: 12px;
 }
 
-.text-sujo {
-  color: #ff5c74; /* vermelho */
-  font-weight: 700;
-}
-
-/* ——— Materiais usados e Munições excedentes com o MESMO visual do orçamento ——— */
 #materiais.resumo,
 #excedentes.resumo {
   background: var(--card) !important;
   border: 1px solid var(--border) !important;
   border-radius: 12px !important;
   padding: 10px 12px !important;
-  white-space: pre-line;   /* quebra de linha igual ao orçamento */
+  white-space: pre-line;
   box-shadow: none !important;
 }
 
-/* O wrapper do bloco de excedentes não deve ter cor/borda próprios */
 #excedentes-wrap {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-  margin-top: 12px;  /* mesmo respiro dos outros blocos */
+  margin-top: 12px;
 }
 
-/* Listas internas: sem margens extras que “descentralizam” visualmente */
 #materiais.resumo,
 #excedentes.resumo {
   margin: 0 !important;
 }
 
+/* ======= LISTAS ======= */
+ul { margin: 0; padding-left: 18px; }
+.success { color: var(--good); font-weight: 700; }
+
+/* ======= RESPONSIVO ======= */
+@media (min-width: 1400px) { .produtos { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1000px) { .produtos { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .produtos { grid-template-columns: 1fr; } }
+
+/* ======= CORES DO TOTAL ======= */
+.text-total { color: #27e18a; font-weight: 700; }  /* verde */
+.text-sujo  { color: #ff5c74; font-weight: 700; }  /* vermelho */
