@@ -140,9 +140,18 @@ input[type="text"], input[type="number"], select {
   border-radius: 12px;
   padding: 10px 12px;
 }
-.materiais { margin-top: 12px; }
-ul { margin: 0; padding-left: 18px; }
-.success { color: var(--good); font-weight: 700; }
+.materiais {
+  margin-top: 12px;
+}
+
+#materiais.resumo,
+#excedentes.resumo {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  white-space: pre-line;
+}
 
 /* Responsivo extra */
 @media (min-width: 1400px) { .produtos { grid-template-columns: repeat(4, 1fr); } }
