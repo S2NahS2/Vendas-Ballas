@@ -142,7 +142,9 @@ function calc() {
     pesoTotal += (p.weight || 0) * qty;
 
     // 👇 Aqui adiciona o número de batches no texto (ex: 45 (2) × Munição Pistola)
-    const batchText = (p.category === 'Munições' && producedBatches > 1) ? ` (${producedBatches})` : '';
+    const producedBatches = (p.category === 'Munições') ? Math.ceil(qty / p.batch) : 1;
+    const batchText = (p.category === 'Munições') ? ` (${producedBatches})` : '';
+
     lines.push(`• ${qty}${batchText} × ${p.name} = ${fmt(lineTotal)}`);
 
     const mm = clone(p.materials);
