@@ -166,3 +166,30 @@ input[type="text"], input[type="number"], select {
   color: #ff5c74; /* vermelho */
   font-weight: 700;
 }
+
+/* ——— Materiais usados e Munições excedentes com o MESMO visual do orçamento ——— */
+#materiais.resumo,
+#excedentes.resumo {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  white-space: pre-line;   /* quebra de linha igual ao orçamento */
+  box-shadow: none !important;
+}
+
+/* O wrapper do bloco de excedentes não deve ter cor/borda próprios */
+#excedentes-wrap {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: 12px;  /* mesmo respiro dos outros blocos */
+}
+
+/* Listas internas: sem margens extras que “descentralizam” visualmente */
+#materiais.resumo,
+#excedentes.resumo {
+  margin: 0 !important;
+}
+
